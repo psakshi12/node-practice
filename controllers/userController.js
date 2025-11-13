@@ -2,16 +2,17 @@ const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 const pool = require('../config/db')
 
-const getAllUser=async(req, res)=>{
+const getAllUser=async(req, res, next)=>{
   try {
       const result = await pool.query(
-      'SELECT * from users ORDER BY id ASC'
+        'SELECT * FROM get_users()'
     ) 
     res.status(200).json({
       status: "success",
       data: result.rows
     })
   }catch(err) {
+    console.log(err, "err")
     next(err)
   }
 }
@@ -43,10 +44,14 @@ const addUser=catchAsync(async(req, res)=>{
     throw new AppError("Required fields are missing", 400);
   }
 
+  // const result = await pool.query(
+  //   'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
+  //   [name, email]
+  // )
   const result = await pool.query(
-    'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
-    [name, email]
+    'SELECT * FROM create_user($1, $2)', [name, email]
   )
+    
   res.status(201).json(result.rows[0])
 })
 

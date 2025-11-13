@@ -15,10 +15,8 @@
       
 const PORT = 3000;
 const express = require('express');
-const authMiddleware = require('./middleware/authMiddleware');
 const userRoute = require('./routes/userRoute');
 const errorMiddleware = require('./middleware/errorMiddleware');
-const { Pool } = require('pg');
 require('dotenv').config();
 
 
@@ -28,8 +26,6 @@ console.log('Connected as user:', process.env.DB_USER);
 
 
 app.use(express.json());
-
-app.use(authMiddleware);
 
 app.use("/api/users", userRoute);
 
