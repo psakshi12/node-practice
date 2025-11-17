@@ -17,6 +17,7 @@ const PORT = 3000;
 const express = require('express');
 const userRoute = require('./routes/userRoute');
 const errorMiddleware = require('./middleware/errorMiddleware');
+const startCronJobs = require('./cron')
 require('dotenv').config();
 
 
@@ -58,4 +59,5 @@ app.use(errorMiddleware);
 
 app.listen(PORT,()=>{
   console.log("Server is running on PORT", PORT)
+  startCronJobs();
 })
