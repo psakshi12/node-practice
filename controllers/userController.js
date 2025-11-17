@@ -4,13 +4,36 @@ const pool = require('../config/db')
 
 const getAllUser=async(req, res, next)=>{
   try {
+    const limit = req.query.limit;
+    const page = req.query.page;
+    const searchQuery = req.query.search;
+
+    const offset = (page -1)*limit;
+
     //Using stored function
-    const result = await pool.query(
-      'SELECT * FROM get_users()'
-    ) 
+    // const result = await pool.query(
+    //   'SELECT * FROM get_users()',
+    // ) 
+
+    // With Pagination
+    const userQuery = 'SELECT * FROM get_users($1, $2, $3)'
+    const countQuery = `SELECT * from get_total_count()`
+    const [userResult, countResult] = await Promise.all(
+      [
+        pool.query(userQuery, [limit, offset, searchQuery]),
+        pool.query(countQuery)
+      ]
+    )
+
+    const totalItems = countResult.rows[0].get_total_count;
+    const totalPages = Math.ceil(totalItems/limit) ;
+
     res.status(200).json({
       status: "success",
-      data: result.rows
+      totalPages,
+      totalItems,
+      currentPage: page,
+      data: userResult.rows,
     })
   }catch(err) {
     console.log(err, "err")
