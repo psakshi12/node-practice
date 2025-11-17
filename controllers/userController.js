@@ -4,8 +4,9 @@ const pool = require('../config/db')
 
 const getAllUser=async(req, res, next)=>{
   try {
-      const result = await pool.query(
-        'SELECT * FROM get_users()'
+    //Using stored function
+    const result = await pool.query(
+      'SELECT * FROM get_users()'
     ) 
     res.status(200).json({
       status: "success",
@@ -22,8 +23,9 @@ const getUserById=async(req, res, next)=>{
   try {
     if(!id) throw new AppError('User id is missing', 400);
 
+    //Using stored function
     const result = await pool.query(
-      'SELECT * from users WHERE id = $1',[id]
+      'SELECT * FROM get_user_by_id($1)',[id]
     ) 
     if(result.rows?.length) {
       res.status(200).json({
@@ -48,6 +50,8 @@ const addUser=catchAsync(async(req, res)=>{
   //   'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *',
   //   [name, email]
   // )
+
+  //Using stored function
   const result = await pool.query(
     'SELECT * FROM create_user($1, $2)', [name, email]
   )
@@ -60,8 +64,12 @@ const updatedUser = catchAsync(async(req, res)=> {
   const {name, email} = req.body;
   if(!name || !email) throw new AppError("Required fields are missing", 400);
 
-  const result = await pool.query(
-    'UPDATE users SET name=$1, email=$2 WHERE id=$3 RETURNING *', [name, email, id]
+  // const result = await pool.query(
+  //   'UPDATE users SET name=$1, email=$2 WHERE id=$3 RETURNING *', [name, email, id]
+  // )
+
+   const result = await pool.query(
+    'SELECT * FROM update_user($1, $2, $3)', [id, name, email]
   )
 
   if(!result.rows.length) {
@@ -78,11 +86,15 @@ const updatedUser = catchAsync(async(req, res)=> {
 const deleteUser=catchAsync(async(req, res)=>{
   const {id} = req.params;
   if(!id) throw new AppError("User id is missing", 400);
-  const result = await pool.query(
-    'DELETE from users WHERE id=$1 RETURNING *', [id]
+  // const result = await pool.query(
+  // 'DELETE from users WHERE id=$1 RETURNING *', [id]
+  // )
+
+   //Using stored function
+   const result = await pool.query(
+    `SELECT * from delete_user($1)`, [id]
   )
   if(result.rowCount === 0) throw new AppError("User does not exist", 404);
-  console.log(result);
   res.json({ message: 'User deleted successfully' });
 })
 
