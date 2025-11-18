@@ -7,7 +7,8 @@ const getAllUser=async(req, res, next)=>{
     const limit = req.query.limit;
     const page = req.query.page;
     const searchQuery = req.query.search;
-
+    const sortBy = req.query.sort_by;
+    const sortOrder = req.query.sort_order;
     const offset = (page -1)*limit;
 
     //Using stored function
@@ -16,11 +17,11 @@ const getAllUser=async(req, res, next)=>{
     // ) 
 
     // With Pagination
-    const userQuery = 'SELECT * FROM get_users($1, $2, $3)'
+    const userQuery = 'SELECT * FROM get_users($1, $2, $3, $4, $5)'
     const countQuery = `SELECT * from get_total_count()`
     const [userResult, countResult] = await Promise.all(
       [
-        pool.query(userQuery, [limit, offset, searchQuery]),
+        pool.query(userQuery, [limit, offset, searchQuery, sortBy, sortOrder]),
         pool.query(countQuery)
       ]
     )
