@@ -16,6 +16,7 @@
 const PORT = 3000;
 const express = require('express');
 const userRoute = require('./routes/userRoute');
+const authRoute = require('./routes/authRoute');
 const errorMiddleware = require('./middleware/errorMiddleware');
 const startCronJobs = require('./cron')
 require('dotenv').config();
@@ -29,6 +30,7 @@ console.log('Connected as user:', process.env.DB_USER);
 app.use(express.json());
 
 app.use("/api/users", userRoute);
+app.use('/api/auth', authRoute);
 
 // Middleware to parse URL-encoded form data
 app.use(express.urlencoded({ extended: false }));

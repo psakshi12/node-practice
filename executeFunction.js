@@ -52,6 +52,21 @@ const executeQuery =async()=>{
     `
   )
 
+  //query for getting user by email
+
+  await pool.query(
+    `CREATE OR REPLACE FUNCTION get_user_by_email(userEmail VARCHAR)
+      RETURNS TABLE(id INT, name VARCHAR, email VARCHAR, password TEXT)
+      AS $$
+
+      BEGIN
+        RETURN QUERY
+        SELECT * from users as u WHERE u.email=userEmail;
+      END;
+      $$ LANGUAGE plpgsql;
+    `
+  )
+
   // query for creating user
   await pool.query(
     `CREATE OR REPLACE FUNCTION create_user(userName VARCHAR, userEmail VARCHAR)
@@ -59,6 +74,18 @@ const executeQuery =async()=>{
     BEGIN
       RETURN QUERY
       INSERT INTO users(name, email) VALUES(userName, userEmail) RETURNING *;
+    END;
+    $$ LANGUAGE plpgsql
+    `
+  )
+
+    // query for creating new user
+  await pool.query(
+    `CREATE OR REPLACE FUNCTION create_new_user(userName VARCHAR, userEmail VARCHAR, userPassword TEXT)
+    RETURNS TABLE(id INT, name VARCHAR, email VARCHAR, password TEXT)  AS $$
+    BEGIN
+      RETURN QUERY
+      INSERT INTO users(name, email, password) VALUES(userName, userEmail, userPassword) RETURNING *;
     END;
     $$ LANGUAGE plpgsql
     `
